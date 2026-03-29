@@ -98,13 +98,16 @@ class Capture {
     // Prevent stream for starting over because we have no listenre between firstWhere check and this line which initally was at the end of the code
     _audioCaptureEventChannelSubscription = audioStream
         .skipWhile((element) => !completer.isCompleted)
-        .listen((data) {
-          if (_sessionId != sessionId) return;
-          listener(data);
-        }, onError: (Object error, StackTrace stackTrace) {
-          if (_sessionId != sessionId) return;
-          onError(error);
-        });
+        .listen(
+          (data) {
+            if (_sessionId != sessionId) return;
+            listener(data);
+          },
+          onError: (Object error, StackTrace stackTrace) {
+            if (_sessionId != sessionId) return;
+            onError(error);
+          },
+        );
     if (waitForFirstData) {
       try {
         await audioStream
