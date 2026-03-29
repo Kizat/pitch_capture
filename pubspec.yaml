@@ -1,6 +1,7 @@
 name: pitch_capture
-description: this package intended for capture pitch
+description: Flutter plugin for microphone audio capture with pitch detection utilities.
 version: 0.0.3
+repository: https://github.com/Kizat/pitch_capture
 
 environment:
   sdk: ^3.7.2
