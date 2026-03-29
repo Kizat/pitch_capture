@@ -1,0 +1,85 @@
+import AVFoundation
+import Flutter
+
+/// `AudioCapture` is a class that handles audio recording and processing.
+public class AudioCapture {
+    /// `audioEngine` is an instance of `AVAudioEngine` used for audio input and output.
+    let audioEngine = AVAudioEngine()
+
+    /// `setup` is a method that sets up the audio session for recording.
+    /// It sets the audio session category to `.record` and activates the audio session.
+    /// - Returns: A boolean indicating whether the audio session was successfully activated.
+    /// - Throws: An error if the audio session could not be set up.
+    public func setup() throws -> Bool {
+        let audioSession = AVAudioSession.sharedInstance()
+        try audioSession.setCategory(.record, mode: .measurement, options: [.mixWithOthers])
+        do {
+            try audioSession.setActive(true)
+            return true
+        } catch {
+            print("Failed to activate AudioSession: \(error)")
+            return false
+        }
+    }
+    
+    /// `startSession` is a method that starts the audio recording session.
+    /// It installs a tap on the input node of the audio engine to capture audio data.
+    /// - Parameters:
+    ///   - bufferSize: The size of the buffer for the audio data.
+    ///   - sampleRate: The sample rate for the audio data.
+    ///   - cb: A callback function that is called with the audio data and sample rate.
+    /// - Throws: An error if the audio engine could not be started.
+    public func startSession(bufferSize: UInt32, sampleRate: Double, cb: @escaping (FlutterStandardTypedData?, Double, Error?) -> Void) throws {
+        let inputNode = audioEngine.inputNode
+        let inputFormat = inputNode.inputFormat(forBus: 0)
+
+        let targetFormat = AVAudioFormat(commonFormat: .pcmFormatInt16, sampleRate: sampleRate, channels: 1, interleaved: true)!
+
+        guard let converter = AVAudioConverter(from: inputFormat, to: targetFormat) else {
+            cb(nil, sampleRate, NSError(domain: "AudioCapture", code: -1, userInfo: [NSLocalizedDescriptionKey: "Failed to create AVAudioConverter"]))
+            return
+        }
+
+        inputNode.installTap(onBus: 0, bufferSize: bufferSize, format: inputFormat) { (buffer, _) in
+            guard let convertedBuffer = AVAudioPCMBuffer(pcmFormat: targetFormat, frameCapacity: buffer.frameCapacity) else {
+                cb(nil, sampleRate, NSError(domain: "AudioCapture", code: -2, userInfo: [NSLocalizedDescriptionKey: "Failed to allocate PCM buffer"]))
+                return
+            }
+
+            let inputBlock: AVAudioConverterInputBlock = { _, outStatus in
+                outStatus.pointee = .haveData
+                return buffer
+            }
+
+            var error: NSError?
+            converter.convert(to: convertedBuffer, error: &error, withInputFrom: inputBlock)
+
+            if let error = error {
+                cb(nil, sampleRate, error)
+                return
+            }
+
+            guard let int16Data = convertedBuffer.int16ChannelData else {
+                cb(nil, sampleRate, NSError(domain: "AudioCapture", code: -3, userInfo: [NSLocalizedDescriptionKey: "No PCM 16-bit channel data found"]))
+                return
+            }
+
+            let frameLength = Int(convertedBuffer.frameLength)
+            let channelData = int16Data.pointee
+            let data = Data(bytes: channelData, count: frameLength * 2) // 2 bytes per Int16
+
+            let flutterData = FlutterStandardTypedData(bytes: data)
+            cb(flutterData, sampleRate, nil)
+        }
+
+        try audioEngine.start()
+    }
+
+    
+    /// `stopSession` is a method that stops the audio recording session.
+    /// It removes the tap on the input node of the audio engine and stops the audio engine.
+    public func stopSession() {
+        audioEngine.inputNode.removeTap(onBus: 0)
+        audioEngine.stop()
+    }
+}

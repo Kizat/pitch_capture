@@ -1,0 +1,22 @@
+PODS:
+  - Flutter (1.0.0)
+  - pitch_capture (1.0.0):
+    - Flutter
+
+DEPENDENCIES:
+  - Flutter (from `Flutter`)
+  - pitch_capture (from `.symlinks/plugins/pitch_capture/ios`)
+
+EXTERNAL SOURCES:
+  Flutter:
+    :path: Flutter
+  pitch_capture:
+    :path: ".symlinks/plugins/pitch_capture/ios"
+
+SPEC CHECKSUMS:
+  Flutter: cabc95a1d2626b1b06e7179b784ebcf0c0cde467
+  pitch_capture: cf47c643af60d3b43a5492515b33a206d1613e5c
+
+PODFILE CHECKSUM: b15748c988f401eae713a706f26dbe2a6ac6494b
+
+COCOAPODS: 1.16.2

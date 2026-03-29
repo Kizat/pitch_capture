@@ -1,0 +1,31 @@
+{
+  "name": "pitch_capture",
+  "version": "1.0.0",
+  "summary": "audio stream capture for iOS and Android OS",
+  "description": "audio stream capture for iOS and Android OS.",
+  "homepage": "https://github.com/",
+  "license": {
+    "file": "../LICENSE"
+  },
+  "authors": {
+    "Kizat Dauletuly": "kishon2810@gmail.com"
+  },
+  "source": {
+    "path": "."
+  },
+  "source_files": "Classes/**/*",
+  "dependencies": {
+    "Flutter": [
+
+    ]
+  },
+  "platforms": {
+    "ios": "13.6"
+  },
+  "pod_target_xcconfig": {
+    "DEFINES_MODULE": "YES",
+    "VALID_ARCHS[sdk=iphonesimulator*]": "x86_64"
+  },
+  "swift_versions": "5.0",
+  "swift_version": "5.0"
+}

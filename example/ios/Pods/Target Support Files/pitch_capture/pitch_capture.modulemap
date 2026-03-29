@@ -1,0 +1,6 @@
+framework module pitch_capture {
+  umbrella header "pitch_capture-umbrella.h"
+
+  export *
+  module * { export * }
+}
